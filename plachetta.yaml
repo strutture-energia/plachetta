@@ -1,0 +1,146 @@
+substitutions:
+  name: "placchetta-test"
+  api_key: "QOs78/kCLrKoz99nvKq2x2I9veLJnCeM1IY0CyBytxQ="
+  wifi_ap_password: "xXTlqq3akaV4"
+  ota_password: "607385f9ddb6cb5c2cc227edf49f366f"
+
+i2c:
+  - id: bus_i2c
+    sda: "GPIO0"
+    scl: "GPIO1"
+    scan: true
+
+uart:
+  id: uart_ld2450
+  tx_pin: "GPIO19"
+  rx_pin: "GPIO18"
+  baud_rate: 256000
+  parity: NONE
+  stop_bits: 1
+
+packages:
+  remote_packages:
+    url: https://github.com/strutture-energia/plachetta.git
+    ref: master
+    refresh: 0s
+    files:
+      - path: esp32-c3.yaml
+        vars:
+          name_esp32c3: ${name}
+          friendly_name: ${name}
+          api_key: ${api_key}
+
+      - path: wifi_config.yaml
+        vars:
+          name: ${name}
+          wifi_ssid: !secret wifi_ssid
+          wifi_password: !secret wifi_password
+          wifi_fast_connect: "true"
+          wifi_power_save_mode: "none"
+          wifi_reboot_timeout: "15min"
+          wifi_ap_timeout: "1min"
+          wifi_ap_password: ${wifi_ap_password}
+          ota_password: ${ota_password}
+
+      - path: BH1750.yaml
+        vars:
+          id_bh1750: "sensore_luminosita"
+          name_bh1750: "Luminosità"
+          i2c_id: "bus_i2c"
+          address_bh1750: "0x23"
+          update_interval_bh1750: "5s"
+
+      - path: SHT3X-D.yaml
+        vars:
+          id_temperatura_sht3xd: "sensore_temperatura"
+          id_umidita_sht3xd: "sensore_umidita"
+          name_temperatura_sht3xd: "Temperatura"
+          name_umidita_sht3xd: "Umidità"
+          i2c_id: "bus_i2c"
+          address_sht3xd: "0x44"
+          update_interval_sht3xd: "5s"
+
+      - path: LD2450.yaml
+        vars:
+          id_ld2450: "ld2450_radar"
+          uart_id: "uart_ld2450"
+          id_has_target: "presenza"
+          name_has_target: "Presenza"
+          id_has_moving_target: "movimento"
+          name_has_moving_target: "Movimento"
+          id_has_still_target: "target"
+          name_has_still_target: "Target"
+
+      - path: PCF8574.yaml
+        vars:
+          id_pcf8574: "pcf8574_hub"
+          address_pcf8574: "0x38"
+          pcf8575: "false"
+
+binary_sensor:
+  - platform: gpio
+    name: "Touch 1"
+    pin:
+      pcf8574: pcf8574_hub
+      number: 3
+      mode:
+        input: true
+      inverted: true
+    on_press:
+      then:
+        - switch.toggle: relay1
+
+  - platform: gpio
+    name: "Touch 2"
+    pin:
+      pcf8574: pcf8574_hub
+      number: 4
+      mode:
+        input: true
+      inverted: true
+    on_press:
+      then:
+        - switch.toggle: relay2
+
+  - platform: gpio
+    name: "Touch 3"
+    pin:
+      pcf8574: pcf8574_hub
+      number: 5
+      mode:
+        input: true
+      inverted: true
+    on_press:
+      then:
+        - switch.toggle: relay3
+
+switch:
+  - platform: gpio
+    name: "Relè 1"
+    id: relay1
+    pin:
+      pcf8574: pcf8574_hub
+      number: 0
+      mode:
+        output: true
+      inverted: false
+
+  - platform: gpio
+    name: "Relè 2"
+    id: relay2
+    pin:
+      pcf8574: pcf8574_hub
+      number: 1
+      mode:
+        output: true
+      inverted: false
+
+  - platform: gpio
+    name: "Relè 3"
+    id: relay3
+    pin:
+      pcf8574: pcf8574_hub
+      number: 2
+      mode:
+        output: true
+      inverted: false
