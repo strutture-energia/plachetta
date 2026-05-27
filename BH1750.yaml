@@ -1,0 +1,14 @@
+substitutions:
+  id_bh1750: ""
+  name_bh1750: ""
+  i2c_id: ""
+  address_bh1750: ""
+  update_interval_bh1750: ""
+
+sensor:
+  - platform: bh1750
+    id: ${id_bh1750}
+    name: ${name_bh1750}
+    i2c_id: ${i2c_id}
+    address: ${address_bh1750}
+    update_interval: ${update_interval_bh1750}
